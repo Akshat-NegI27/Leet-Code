@@ -1,15 +1,20 @@
 class Solution {
-public boolean predictTheWinner(int[] nums) { // Lowercase 'p'
-    final int n = nums.length;
-    int[] dp = nums.clone();
+    public boolean predictTheWinner(int[] nums) {
+        int n = nums.length;
+        int[][] dp = new int[n][n];
 
-    for (int d = 1; d < n; ++d)
-        for (int j = n - 1; j - d >= 0; --j) {
-            final int i = j - d;
-            dp[j] = Math.max(nums[i] - dp[j],     // Pick the leftmost number.
-                             nums[j] - dp[j - 1]); // Pick the rightmost number.
+        for (int i = 0; i < n; i++) {
+            dp[i][i] = nums[i];
         }
 
-    return dp[n - 1] >= 0;
-}
+        for (int len = 2; len <= n; len++) {
+            for (int i = 0; i + len - 1 < n; i++) {
+                int j = i + len - 1;
+                dp[i][j] = Math.max(nums[i] - dp[i + 1][j],
+                                    nums[j] - dp[i][j - 1]);
+            }
+        }
+
+        return dp[0][n - 1] >= 0;
+    }
 }
