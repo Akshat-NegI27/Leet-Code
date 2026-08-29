@@ -1,43 +1,51 @@
 class Solution {
-  public int[] lexicographicallySmallestArray(int[] nums, int limit) {
-    int[] ans = new int[nums.length];
-    List<List<Pair<Integer, Integer>>> numAndIndexesGroups = new ArrayList<>();
+    public int[] lexicographicallySmallestArray(int[] nums, int limit) {
 
-    for (Pair<Integer, Integer> numAndIndex : getNumAndIndexes(nums))
-      if (numAndIndexesGroups.isEmpty() ||
-          numAndIndex.getKey() -
-                  numAndIndexesGroups.get(numAndIndexesGroups.size() - 1)
-                      .get(numAndIndexesGroups.get(numAndIndexesGroups.size() - 1).size() - 1)
-                      .getKey() >
-              limit) {
-        // Start a new group.
-        numAndIndexesGroups.add(new ArrayList<>(List.of(numAndIndex)));
-      } else {
-        // Append to the existing group.
-        numAndIndexesGroups.get(numAndIndexesGroups.size() - 1).add(numAndIndex);
-      }
+        int n = nums.length;
 
-    for (List<Pair<Integer, Integer>> numAndIndexesGroup : numAndIndexesGroups) {
-      List<Integer> sortedNums = new ArrayList<>();
-      List<Integer> sortedIndices = new ArrayList<>();
-      for (Pair<Integer, Integer> pair : numAndIndexesGroup) {
-        sortedNums.add(pair.getKey());
-        sortedIndices.add(pair.getValue());
-      }
-      sortedIndices.sort(null);
-      for (int i = 0; i < sortedNums.size(); ++i) {
-        ans[sortedIndices.get(i)] = sortedNums.get(i);
-      }
+        // Store [value, originalIndex]
+        int[][] arr = new int[n][2];
+
+        for (int i = 0; i < n; i++) {
+            arr[i][0] = nums[i];
+            arr[i][1] = i;
+        }
+
+        // Sort by value
+        Arrays.sort(arr, (a, b) -> Integer.compare(a[0], b[0]));
+
+        int start = 0;
+
+        while (start < n) {
+
+            int end = start;
+
+            // Find one connected group
+            while (end + 1 < n &&
+                    arr[end + 1][0] - arr[end][0] <= limit) {
+                end++;
+            }
+
+            // Get original indices of this group
+            int size = end - start + 1;
+
+            int[] indices = new int[size];
+
+            for (int i = 0; i < size; i++) {
+                indices[i] = arr[start + i][1];
+            }
+
+            // Sort indices so smallest values go to
+            // smallest positions
+            Arrays.sort(indices);
+
+            for (int i = 0; i < size; i++) {
+                nums[indices[i]] = arr[start + i][0];
+            }
+
+            start = end + 1;
+        }
+
+        return nums;
     }
-
-    return ans;
-  }
-
-  private Pair<Integer, Integer>[] getNumAndIndexes(int[] nums) {
-    Pair<Integer, Integer>[] numAndIndexes = new Pair[nums.length];
-    for (int i = 0; i < nums.length; ++i)
-      numAndIndexes[i] = new Pair<>(nums[i], i);
-    Arrays.sort(numAndIndexes, (a, b) -> a.getKey().compareTo(b.getKey()));
-    return numAndIndexes;
-  }
 }
